@@ -22,7 +22,6 @@ export class UsersService {
     return this.userRepository.save(user);
   }
   findByEmail(email: string): Promise<User | null> {
-    // return this.userRepository.findOne({ where: { email } });
     return this.userRepository.findOneBy({ email });
   }
 
