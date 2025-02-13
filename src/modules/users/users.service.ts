@@ -76,6 +76,5 @@ export class UsersService {
   async findByRole(role: string): Promise<UserDto[]> {
     const users = await this.userRepository.find({ where: { role: role } });
     const userDtos = users.map((item) => UserMapper.toDtos(item));
-    return userDtos;
   }
 }
