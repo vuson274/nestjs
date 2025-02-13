@@ -1,25 +1,21 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from '../role/role.enum';
 
-@Entity('users')
-export class User {
+@Entity('posts')
+export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  username: string;
-
-  @Column({ unique: true })
-  email: string;
+  title: string;
 
   @Column()
-  password: string;
+  description: string;
 
-  @Column({ default: null })
-  refresh_token?: string;
+  @Column()
+  image: string;
 
-  @Column({ default: Role.User })
-  role: string;
+  @Column()
+  user_id: number;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

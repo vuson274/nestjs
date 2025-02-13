@@ -1,48 +1,42 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductsModule } from './modules/products/products.module';
-import { Product } from './entities/Product';
-// import { LoggingMiddleware } from './middleware/logging/logging.middleware';
 import { UsersModule } from './modules/users/users.module';
 import { User } from './entities/User';
+import { Post } from './entities/Post';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import * as process from 'node:process';
+import { LoggingMiddleware } from './middleware/logging/logging.middleware';
+import { PostsModule } from './modules/posts/posts.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: process.env.DB_DRIVER as  'mysql' || 'mysql',
+      type: (process.env.DB_DRIVER as 'mysql') || 'mysql',
       host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
+      port: 3306,
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      // autoLoadEntities: true,
-      entities: [Product, User],
+      autoLoadEntities: true,
+      entities: [User, Post],
       synchronize: true,
     }),
-    ProductsModule,
     UsersModule,
     AuthModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer.apply(LoggingMiddleware).forRoutes(
-  //     {
-  //       path: '/products/*',
-  //       method: RequestMethod.ALL,
-  //     },
-  //     {
-  //       path: '/products',
-  //       method: RequestMethod.ALL,
-  //     },
-  //   );
-  // }
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes({
+      path: '/users',
+      method: RequestMethod.ALL,
+    });
+  }
 }
