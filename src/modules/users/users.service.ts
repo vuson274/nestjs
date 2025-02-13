@@ -4,7 +4,7 @@ import { User } from '../../entities/User';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from '../../dto/user.dto';
-import { UserMapper } from '../../mapper/UserMapper';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -49,8 +49,28 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
+  async findAll(): Promise<{ users: UserDto[]; admins: UserDto[] }> {
+    const users = await this.userRepository.find();
+    // const userDtos = plainToInstance(UserDto, users);
+    const userDtos = users.map(user => ({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    }));
+    console.log(userDtos);
+    const grouped = userDtos.reduce(
+      (acc, user) => {
+        if (user.role === 'user') {
+          acc.users.push(user);
+        } else if (user.role === 'admin') {
+          acc.admins.push(user);
+        }
+        return acc;
+      },
+      { users: [], admins: [] } as { users: UserDto[]; admins: UserDto[] }
+    );
+
+    return grouped;
   }
 
   async findOne(id: number): Promise<User | null> {
@@ -73,8 +93,12 @@ export class UsersService {
     return product;
   }
 
-  async findByRole(role: string): Promise<UserDto[]> {
+  async findByRole(role: string): Promise<UserDto[]|null> {
     const users = await this.userRepository.find({ where: { role: role } });
-    const userDtos = users.map((item) => UserMapper.toDtos(item));
+    return users.map(user => ({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    }));
   }
 }

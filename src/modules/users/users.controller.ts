@@ -19,16 +19,15 @@ import { UserDto } from '../../dto/user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Get()
-  findByRole(@Query('role') role: string): Promise<UserDto[]> {
-    return this.usersService.findByRole(role);
-  }
+  // @Get()
+  // findByRole(@Query('role') role: string): Promise<UserDto[] |null> {
+  //   return this.usersService.findByRole(role);
+  // }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
   @Get()
   findAll() {
-    console.log(2);
     return this.usersService.findAll();
   }
 
