@@ -38,5 +38,9 @@ export class AppModule {
       path: '/users',
       method: RequestMethod.ALL,
     });
+    consumer.apply(LoggingMiddleware).forRoutes({
+      path: '/users/*',
+      method: RequestMethod.ALL,
+    });
   }
 }

@@ -17,27 +17,26 @@
 //   }
 //
 // }
-import { Injectable } from '@nestjs/common';
-import * as multer from 'multer';
-import { FileInterceptor } from '@nestjs/platform-express';
-
-@Injectable()
-export class FileUploadService {
-  getFileStorageOptions(): multer.StorageEngine {
-    return multer.diskStorage({
-      destination: (req, file, cb) => {
-        cb(null, './uploads');
-      },
-      filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-      },
-    });
-  }
-
-  createFileInterceptor() {
-    return FileInterceptor('file', {
-      storage: this.getFileStorageOptions(),
-    });
-  }
-}
-
+// import { Injectable } from '@nestjs/common';
+// import * as multer from 'multer';
+// import { FileInterceptor } from '@nestjs/platform-express';
+//
+// @Injectable()
+// export class FileUploadService {
+//   getFileStorageOptions(): multer.StorageEngine {
+//     return multer.diskStorage({
+//       destination: (req, file, cb) => {
+//         cb(null, './uploads');
+//       },
+//       filename: (req, file, cb) => {
+//         cb(null, `${Date.now()}-${file.originalname}`);
+//       },
+//     });
+//   }
+//
+//   createFileInterceptor() {
+//     return FileInterceptor('file', {
+//       storage: this.getFileStorageOptions(),
+//     });
+//   }
+// }

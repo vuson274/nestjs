@@ -26,6 +26,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   login(@Request() request: any) {
+    console.log(request);
     return this.authService.login(request.user);
   }
   @UseGuards(JwtAuthGuard)

@@ -5,7 +5,7 @@ import {
   Get,
   Param,
   Patch,
-  Query,
+  // Query,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -14,8 +14,10 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { Role } from '../../role/role.enum';
 import { RolesGuard } from '../../guards/roles.guard';
 import { User } from '../../entities/User';
-import { UserDto } from '../../dto/user.dto';
-
+// import { UserDto } from '../../dto/user.dto';
+// import { Post as PostEntity } from '../../entities/Post';
+import { ApiBearerAuth } from '@nestjs/swagger';
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -23,6 +25,10 @@ export class UsersController {
   // findByRole(@Query('role') role: string): Promise<UserDto[] |null> {
   //   return this.usersService.findByRole(role);
   // }
+  @Get('/with-post')
+  findAllWithPost(): Promise<User[]> {
+    return this.usersService.findAllWithPost();
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)

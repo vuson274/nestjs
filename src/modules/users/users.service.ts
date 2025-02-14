@@ -1,10 +1,11 @@
-import { HttpException, HttpStatus, Injectable, Query } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/User';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from '../../dto/user.dto';
-import { plainToInstance } from 'class-transformer';
+// import { Post } from '../../entities/Post';
+// import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -39,20 +40,23 @@ export class UsersService {
     return user;
   }
 
-  async saveRefreshToken(refreshToken: string, userId: number) {
+  async saveToken(refreshToken: string, accessToken: string, userId: number) {
     const user = await this.userRepository.findOneBy({ id: userId });
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedAccessToken = await bcrypt.hash(accessToken, 10);
     if (!user) {
       throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     }
+
     user.refresh_token = hashedRefreshToken;
+    user.access_token = hashedAccessToken;
     return this.userRepository.save(user);
   }
 
   async findAll(): Promise<{ users: UserDto[]; admins: UserDto[] }> {
     const users = await this.userRepository.find();
     // const userDtos = plainToInstance(UserDto, users);
-    const userDtos = users.map(user => ({
+    const userDtos = users.map((user) => ({
       username: user.username,
       email: user.email,
       role: user.role,
@@ -67,7 +71,7 @@ export class UsersService {
         }
         return acc;
       },
-      { users: [], admins: [] } as { users: UserDto[]; admins: UserDto[] }
+      { users: [], admins: [] } as { users: UserDto[]; admins: UserDto[] },
     );
 
     return grouped;
@@ -93,12 +97,18 @@ export class UsersService {
     return product;
   }
 
-  async findByRole(role: string): Promise<UserDto[]|null> {
+  async findByRole(role: string): Promise<UserDto[] | null> {
     const users = await this.userRepository.find({ where: { role: role } });
-    return users.map(user => ({
+    return users.map((user) => ({
       username: user.username,
       email: user.email,
       role: user.role,
     }));
+  }
+
+  async findAllWithPost(): Promise<User[]> {
+    return await this.userRepository.find({
+      relations: ['posts'],
+    });
   }
 }

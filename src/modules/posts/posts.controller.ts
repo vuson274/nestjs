@@ -1,27 +1,48 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
-import { FileUploadService } from '../../common/file-upload/file-upload.service';
+import {
+  Controller,
+  Post,
+  Body,
+  UseInterceptors,
+  UploadedFile,
+  Request,
+  UseGuards,
+  Get,
+  Param,
+} from '@nestjs/common';
 import { CreatePostDto } from '../../dto/post.dto';
-
+import { FileInterceptor } from '@nestjs/platform-express';
+import { PostsService } from './posts.service';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
+import { Post as PostEntity } from '../../entities/Post';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+@ApiBearerAuth()
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly fileUploadService : FileUploadService) {
-  }
-  private createFileInterceptor() {
-    return this.fileUploadService.createFileInterceptor();
-  }
+  constructor(private readonly postService: PostsService) {}
+  @UseGuards(JwtAuthGuard)
   @Post('upload')
-  @UseInterceptors(createFileInterceptor)
+  @UseInterceptors(FileInterceptor('file'))
   uploadFileWithPost(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createPostDto: CreatePostDto
+    @Body() createPostDto: CreatePostDto,
+    @Request() req: any,
   ) {
-    console.log('Bài viết:', createPostDto);
-    console.log('Tệp tải lên:', file);
+    // console.log(file);
+    // console.log(createPostDto);
+    const user = req.user.id;
+    return this.postService.createPost(file, createPostDto, user);
+  }
 
-    return {
-      message: 'Tải lên thành công!',
-      filePath: `uploads/${file.filename}`,
-      post: createPostDto,
-    };
+  @Get()
+  findAll(): Promise<PostEntity[]> {
+    return this.postService.findAll();
+  }
+
+  @ApiOperation({ summary: 'Get post' })
+  @ApiResponse({ status: 200, description: 'Return post' })
+  @Get(':id')
+  findById(@Param('id') id: string): Promise<PostEntity | null> {
+    const postId = Number(id);
+    return this.postService.findPostById(postId);
   }
 }
