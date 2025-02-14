@@ -5,6 +5,4 @@ export class CreatePostDto {
   title: string;
   @IsString()
   description: string;
-  @IsOptional()
-  image: string;
 }

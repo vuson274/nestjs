@@ -1,33 +1,27 @@
-import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { Controller, Post, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileUploadService } from '../../common/file-upload/file-upload.service';
 import { CreatePostDto } from '../../dto/post.dto';
-import { extname } from 'path';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
-
-  @Post()
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const filename = Date.now() + extname(file.originalname);
-          callback(null, filename);
-        },
-      }),
-    }),
-  )
-  createPost(
-    @Body() createPostDto: CreatePostDto,
-    @UploadedFile() image: Express.Multer.File,
+  constructor(private readonly fileUploadService : FileUploadService) {
+  }
+  private createFileInterceptor() {
+    return this.fileUploadService.createFileInterceptor();
+  }
+  @Post('upload')
+  @UseInterceptors(createFileInterceptor)
+  uploadFileWithPost(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createPostDto: CreatePostDto
   ) {
-    if (image) {
-      createPostDto.image = image.filename;
-    }
-    return this.postService.create(createPostDto);
+    console.log('Bài viết:', createPostDto);
+    console.log('Tệp tải lên:', file);
+
+    return {
+      message: 'Tải lên thành công!',
+      filePath: `uploads/${file.filename}`,
+      post: createPostDto,
+    };
   }
 }
