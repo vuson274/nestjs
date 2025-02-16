@@ -43,13 +43,13 @@ export class UsersService {
   async saveToken(refreshToken: string, accessToken: string, userId: number) {
     const user = await this.userRepository.findOneBy({ id: userId });
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    const hashedAccessToken = await bcrypt.hash(accessToken, 10);
+    // const hashedAccessToken = await bcrypt.hash(accessToken, 10);
     if (!user) {
       throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     }
 
     user.refresh_token = hashedRefreshToken;
-    user.access_token = hashedAccessToken;
+    user.access_token = accessToken;
     return this.userRepository.save(user);
   }
 
@@ -61,7 +61,7 @@ export class UsersService {
       email: user.email,
       role: user.role,
     }));
-    console.log(userDtos);
+    // console.log(userDtos);
     const grouped = userDtos.reduce(
       (acc, user) => {
         if (user.role === 'user') {
